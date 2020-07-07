@@ -31,11 +31,11 @@ provider "template" {
 }
 
 data "aws_eks_cluster" "cluster" {
-  name = module.eks.cluster_id
+  name = aws_eks_cluster.example.id
 }
 
 data "aws_eks_cluster_auth" "cluster" {
-  name = module.eks.cluster_id
+  name = aws_eks_cluster.example.id
 }
 
 provider "kubernetes" {
@@ -129,28 +129,47 @@ module "vpc" {
   }
 }
 
-module "eks" {
-  source  = "github.com/ndmckinley/terraform-aws-eks"
-  cluster_name = local.cluster_name
-  subnets      = module.vpc.private_subnets
-  cluster_version = "1.16"
+resource "aws_iam_role" "example" {
+  name = "eks-cluster-example"
 
-  tags = {
-    Environment = "test"
-    GithubRepo  = "group16-tfc"
-    GithubOrg   = "ndmckinley"
+  assume_role_policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "eks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+POLICY
+}
+
+resource "aws_iam_role_policy_attachment" "example-AmazonEKSClusterPolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  role       = aws_iam_role.example.name
+}
+
+resource "aws_iam_role_policy_attachment" "example-AmazonEKSServicePolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+  role       = aws_iam_role.example.name
+}
+
+resource "aws_eks_cluster" "example" {
+  name     = "example"
+  role_arn = aws_iam_role.example.arn
+
+  vpc_config {
+    subnet_ids = module.vpc.private_subnets
   }
 
-  vpc_id = module.vpc.vpc_id
-
-  worker_groups = [
-    {
-      name                          = "worker-group-1"
-      instance_type                 = "t2.small"
-      asg_desired_capacity          = 2
-      additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
-    },
+  # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.
+  # Otherwise, EKS will not be able to properly delete EKS managed EC2 infrastructure such as Security Groups.
+  depends_on = [
+    aws_iam_role_policy_attachment.example-AmazonEKSClusterPolicy,
+    aws_iam_role_policy_attachment.example-AmazonEKSServicePolicy,
   ]
-
-  worker_additional_security_group_ids = [aws_security_group.all_worker_mgmt.id]
 }
