@@ -130,12 +130,10 @@ module "vpc" {
 }
 
 module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "12.1.0"
+  source  = "github.com/ndmckinley/terraform-aws-eks"
   cluster_name = local.cluster_name
   subnets      = module.vpc.private_subnets
   cluster_version = "1.16"
-  worker_ami_owner_id_windows = var.worker_ami_owner_id_windows
 
   tags = {
     Environment = "test"
