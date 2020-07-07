@@ -112,7 +112,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "2.6.0"
 
-  name                 = "test-vpc"
+  name                 = "nmckinley-vpc"
   cidr                 = "10.0.0.0/16"
   azs                  = data.aws_availability_zones.available.names
   private_subnets      = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
@@ -162,7 +162,7 @@ resource "aws_iam_role_policy_attachment" "nmckinley-AmazonEKSServicePolicy" {
 }
 
 resource "aws_eks_cluster" "nmckinley" {
-  name     = "nmckinley-cluster-1234"
+  name     = "nmckinley"
   role_arn = aws_iam_role.nmckinley.arn
 
   vpc_config {
