@@ -162,7 +162,7 @@ resource "aws_iam_role_policy_attachment" "nmckinley-AmazonEKSServicePolicy" {
 }
 
 resource "aws_eks_cluster" "nmckinley" {
-  name     = "nmckinley"
+  name     = "nmckinley-cluster-1234"
   role_arn = aws_iam_role.nmckinley.arn
 
   vpc_config {
