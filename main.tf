@@ -166,7 +166,7 @@ resource "aws_eks_cluster" "nmckinley" {
   role_arn = aws_iam_role.nmckinley.arn
 
   vpc_config {
-    subnet_ids = ["foo", "bar"]
+    subnet_ids = module.vpc.private_subnets
   }
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.
