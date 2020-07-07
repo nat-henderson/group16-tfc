@@ -12,6 +12,9 @@ terraform {
 provider "aws" {
   version = ">= 2.28.1"
   region  = var.aws_region
+  assume_role {
+    role_arn = "arn:aws:iam::503249568911:role/nmckinley-terraform"
+  }
 }
 
 provider "random" {
@@ -31,11 +34,11 @@ provider "template" {
 }
 
 data "aws_eks_cluster" "cluster" {
-  name = aws_eks_cluster.example.id
+  name = aws_eks_cluster.nmckinley.id
 }
 
 data "aws_eks_cluster_auth" "cluster" {
-  name = aws_eks_cluster.example.id
+  name = aws_eks_cluster.nmckinley.id
 }
 
 provider "kubernetes" {
@@ -129,8 +132,8 @@ module "vpc" {
   }
 }
 
-resource "aws_iam_role" "example" {
-  name = "eks-cluster-example"
+resource "aws_iam_role" "nmckinley" {
+  name = "eks-cluster-nmckinley"
 
   assume_role_policy = <<POLICY
 {
@@ -148,19 +151,19 @@ resource "aws_iam_role" "example" {
 POLICY
 }
 
-resource "aws_iam_role_policy_attachment" "example-AmazonEKSClusterPolicy" {
+resource "aws_iam_role_policy_attachment" "nmckinley-AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.example.name
+  role       = aws_iam_role.nmckinley.name
 }
 
-resource "aws_iam_role_policy_attachment" "example-AmazonEKSServicePolicy" {
+resource "aws_iam_role_policy_attachment" "nmckinley-AmazonEKSServicePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-  role       = aws_iam_role.example.name
+  role       = aws_iam_role.nmckinley.name
 }
 
-resource "aws_eks_cluster" "example" {
-  name     = "example"
-  role_arn = aws_iam_role.example.arn
+resource "aws_eks_cluster" "nmckinley" {
+  name     = "nmckinley"
+  role_arn = aws_iam_role.nmckinley.arn
 
   vpc_config {
     subnet_ids = module.vpc.private_subnets
@@ -169,7 +172,7 @@ resource "aws_eks_cluster" "example" {
   # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.
   # Otherwise, EKS will not be able to properly delete EKS managed EC2 infrastructure such as Security Groups.
   depends_on = [
-    aws_iam_role_policy_attachment.example-AmazonEKSClusterPolicy,
-    aws_iam_role_policy_attachment.example-AmazonEKSServicePolicy,
+    aws_iam_role_policy_attachment.nmckinley-AmazonEKSClusterPolicy,
+    aws_iam_role_policy_attachment.nmckinley-AmazonEKSServicePolicy,
   ]
 }

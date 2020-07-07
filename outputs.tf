@@ -1,3 +1,3 @@
 output "eks_output" {
-  value = aws_eks_cluster.example.id
+  value = aws_eks_cluster.nmckinley.id
 }
