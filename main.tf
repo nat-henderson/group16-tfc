@@ -222,3 +222,27 @@ resource "kubernetes_namespace" "example" {
   }
   provider = kubernetes.prod
 }
+resource "kubernetes_namespace" "example" {
+  for_each = { "team-1" : "foo",
+  "team-2" : "bar" }
+  metadata {
+    annotations = {
+      team_name = each.value
+    }
+
+    name = "namespace-${each.key}"
+  }
+  provider = kubernetes.dev
+}
+resource "kubernetes_namespace" "example" {
+  for_each = { "team-1" : "foo",
+  "team-2" : "bar" }
+  metadata {
+    annotations = {
+      team_name = each.value
+    }
+
+    name = "namespace-${each.key}"
+  }
+  provider = kubernetes.test
+}
