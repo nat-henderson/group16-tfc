@@ -210,43 +210,6 @@ provider "kubernetes" {
   alias                  = "dev"
 }
 
-resource "kubernetes_namespace" "prod" {
-  for_each = { "team-1" : "foo",
-  "team-2" : "bar" }
-  metadata {
-    annotations = {
-      team_name = each.value
-    }
-
-    name = "namespace-${each.key}"
-  }
-  provider = kubernetes.prod
-}
-resource "kubernetes_namespace" "dev" {
-  for_each = { "team-1" : "foo",
-  "team-2" : "bar" }
-  metadata {
-    annotations = {
-      team_name = each.value
-    }
-
-    name = "namespace-${each.key}"
-  }
-  provider = kubernetes.dev
-}
-resource "kubernetes_namespace" "test" {
-  for_each = { "team-1" : "foo",
-  "team-2" : "bar" }
-  metadata {
-    annotations = {
-      team_name = each.value
-    }
-
-    name = "namespace-${each.key}"
-  }
-  provider = kubernetes.test
-}
-
 resource "aws_ecr_repository" "registry" {
   for_each = toset(["prod", "test", "dev"])
   name = "group16-ecr-${each.value}"
