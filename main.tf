@@ -246,3 +246,14 @@ resource "kubernetes_namespace" "test" {
   }
   provider = kubernetes.test
 }
+
+resource "aws_ecr_repository" "foo" {
+  for_each = { "team-1" : "foo",
+  "team-2" : "bar" }
+  name = "nmckinley-ecr-${each.key}"
+}
+
+resource "aws_s3_bucket" "b" {
+  bucket = "nmckinley-bucket-${each.key}"
+  acl    = "private"
+}
