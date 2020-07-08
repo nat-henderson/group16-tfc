@@ -33,21 +33,6 @@ provider "template" {
   version = "~> 2.1"
 }
 
-data "aws_eks_cluster" "cluster" {
-  name = aws_eks_cluster.nmckinley.id
-}
-
-data "aws_eks_cluster_auth" "cluster" {
-  name = aws_eks_cluster.nmckinley.id
-}
-
-provider "kubernetes" {
-  host                   = data.aws_eks_cluster.cluster.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
-  token                  = data.aws_eks_cluster_auth.cluster.token
-  load_config_file       = false
-  version                = "~> 1.11"
-}
 
 data "aws_availability_zones" "available" {
 }
@@ -162,7 +147,8 @@ resource "aws_iam_role_policy_attachment" "nmckinley-AmazonEKSServicePolicy" {
 }
 
 resource "aws_eks_cluster" "nmckinley" {
-  name     = "nmckinley"
+  for_each = toset(["prod", "test", "dev"])
+  name     = "nmckinley-${each.value}"
   role_arn = aws_iam_role.nmckinley.arn
 
   vpc_config {
@@ -175,4 +161,64 @@ resource "aws_eks_cluster" "nmckinley" {
     aws_iam_role_policy_attachment.nmckinley-AmazonEKSClusterPolicy,
     aws_iam_role_policy_attachment.nmckinley-AmazonEKSServicePolicy,
   ]
+}
+data "aws_eks_cluster" "cluster_prod" {
+  name = aws_eks_cluster.nmckinley["prod"].id
+}
+
+data "aws_eks_cluster_auth" "cluster_prod" {
+  name = aws_eks_cluster.nmckinley["prod"].id
+}
+data "aws_eks_cluster" "cluster_test" {
+  name = aws_eks_cluster.nmckinley["test"].id
+}
+
+data "aws_eks_cluster_auth" "cluster_test" {
+  name = aws_eks_cluster.nmckinley["test"].id
+}
+
+data "aws_eks_cluster" "cluster_dev" {
+  name = aws_eks_cluster.nmckinley["dev"].id
+}
+
+data "aws_eks_cluster_auth" "cluster_dev" {
+  name = aws_eks_cluster.nmckinley["dev"].id
+}
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.cluster_prod.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster_prod.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.cluster_prod.token
+  load_config_file       = false
+  version                = "~> 1.11"
+  alias                  = "prod"
+}
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.cluster_test.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster_test.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.cluster_test.token
+  load_config_file       = false
+  version                = "~> 1.11"
+  alias                  = "test"
+}
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.cluster_dev.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster_dev.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.cluster_dev.token
+  load_config_file       = false
+  version                = "~> 1.11"
+  alias                  = "dev"
+}
+
+resource "kubernetes_namespace" "example" {
+  for_each = { "team-1" : "foo",
+  "team-2" : "bar" }
+  metadata {
+    annotations = {
+      team_name = each.value
+    }
+
+    name = "namespace-${each.key}"
+  }
+  provider = kubernetes.prod
 }
