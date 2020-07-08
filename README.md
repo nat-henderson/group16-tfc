@@ -1,3 +1,3 @@
-# Terraform Cloud Getting Started Guide Example
-
-This is an example Terraform configuration intended for use with the Terraform Cloud Getting Started Guide hosted at https://learn.hashicorp.com/terraform/cloud-gettingstarted/tfc_overview
+# TFC
+This is a terraform cloud project intended to exercise TFC and AWS by creating a
+k8s cluster with namespaces available per team.
