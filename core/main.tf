@@ -163,6 +163,8 @@ resource "aws_eks_cluster" "nmckinley" {
   ]
 }
 
+# add a comment to test TFC integration
+
 resource "aws_ecr_repository" "registry" {
   for_each = toset(["prod", "test", "dev"])
   name = "group16-ecr-${each.value}"
