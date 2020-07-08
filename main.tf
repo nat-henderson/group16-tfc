@@ -210,7 +210,7 @@ provider "kubernetes" {
   alias                  = "dev"
 }
 
-resource "kubernetes_namespace" "example" {
+resource "kubernetes_namespace" "prod" {
   for_each = { "team-1" : "foo",
   "team-2" : "bar" }
   metadata {
@@ -222,7 +222,7 @@ resource "kubernetes_namespace" "example" {
   }
   provider = kubernetes.prod
 }
-resource "kubernetes_namespace" "example" {
+resource "kubernetes_namespace" "dev" {
   for_each = { "team-1" : "foo",
   "team-2" : "bar" }
   metadata {
@@ -234,7 +234,7 @@ resource "kubernetes_namespace" "example" {
   }
   provider = kubernetes.dev
 }
-resource "kubernetes_namespace" "example" {
+resource "kubernetes_namespace" "test" {
   for_each = { "team-1" : "foo",
   "team-2" : "bar" }
   metadata {
