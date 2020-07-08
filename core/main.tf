@@ -247,13 +247,13 @@ resource "kubernetes_namespace" "test" {
   provider = kubernetes.test
 }
 
-resource "aws_ecr_repository" "foo" {
-  for_each = { "team-1" : "foo",
-  "team-2" : "bar" }
-  name = "nmckinley-ecr-${each.key}"
+resource "aws_ecr_repository" "registry" {
+  for_each = toset(["prod", "test", "dev"])
+  name = "group16-ecr-${each.value}"
 }
 
-resource "aws_s3_bucket" "b" {
-  bucket = "nmckinley-bucket-${each.key}"
+resource "aws_s3_bucket" "bucket" {
+  for_each = toset(["prod", "test", "dev"])
+  bucket = "group16-bucket-${each.value}"
   acl    = "private"
 }
